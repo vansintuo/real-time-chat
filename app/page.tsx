@@ -40,7 +40,7 @@ export default function ChatApp() {
   // IMPORTANT: Replace 'YOUR_NEW_BOT_TOKEN_HERE' with the token you got from @BotFather in Step 1.
   // This is used for the initial setup flow.
   // ----------------------------------------------------------------------------------------------------
-  const [botTokenInput, setBotTokenInput] = useState("7460941639:AAEO3dL1DE6BDxw_xnUNGbWBZXUSO2O6EnI") // <--- UPDATE THIS LINE
+  const [botTokenInput, setBotTokenInput] = useState("") // <--- UPDATE THIS LINE
   const [webhookStatus, setWebhookStatus] = useState<{ type: "success" | "error"; message: string } | null>(null)
   const [isWebhookLoading, setIsWebhookLoading] = useState(false)
 
@@ -80,7 +80,7 @@ export default function ChatApp() {
 
     try {
       const currentDomain = window.location.origin
-      const webhookUrl = `https://x8q5lqcs-9090.asse.devtunnels.ms/api/telegram-webhook`
+      const webhookUrl = `https://real-time-chat-coral-seven.vercel.app/telegram-webhook`
 
       const response = await fetch("/api/telegram-webhook-setup", {
         method: "POST",
