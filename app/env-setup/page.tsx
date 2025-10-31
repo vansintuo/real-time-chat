@@ -1,52 +1,63 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
-import { Settings, Copy, CheckCircle, AlertCircle, Download, Key, Database, Shield, Server } from "lucide-react"
-import Link from "next/link"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Settings,
+  Copy,
+  CheckCircle,
+  AlertCircle,
+  Download,
+  Key,
+  Database,
+  Shield,
+  Server,
+} from "lucide-react";
+import Link from "next/link";
 
 interface EnvStatus {
-  name: string
-  value?: string
-  required: boolean
-  status: "missing" | "present" | "configured"
-  description: string
+  name: string;
+  value?: string;
+  required: boolean;
+  status: "missing" | "present" | "configured";
+  description: string;
 }
 
 export default function EnvSetupPage() {
-  const [envVars, setEnvVars] = useState<EnvStatus[]>([])
-  const [customChatId, setCustomChatId] = useState("")
-  const [customWebhookSecret, setCustomWebhookSecret] = useState("")
-  const [generatedEnv, setGeneratedEnv] = useState("")
+  const [envVars, setEnvVars] = useState<EnvStatus[]>([]);
+  const [customChatId, setCustomChatId] = useState("");
+  const [customWebhookSecret, setCustomWebhookSecret] = useState("");
+  const [generatedEnv, setGeneratedEnv] = useState("");
 
   useEffect(() => {
-    checkEnvStatus()
-    generateRandomSecrets()
-  }, [])
+    checkEnvStatus();
+    generateRandomSecrets();
+  }, []);
 
   const generateRandomSecrets = () => {
-    const webhookSecret = generateRandomString(32)
-    const nextAuthSecret = generateRandomString(32)
-    setCustomWebhookSecret(webhookSecret)
+    const webhookSecret = generateRandomString(32);
+    const nextAuthSecret = generateRandomString(32);
+    setCustomWebhookSecret(webhookSecret);
 
-    updateGeneratedEnv(customChatId, webhookSecret, nextAuthSecret)
-  }
+    updateGeneratedEnv(customChatId, webhookSecret, nextAuthSecret);
+  };
 
   const generateRandomString = (length: number) => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-    let result = ""
+    const chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
     for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length))
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    return result
-  }
+    return result;
+  };
 
   const checkEnvStatus = async () => {
     const envChecks: EnvStatus[] = [
@@ -85,12 +96,16 @@ export default function EnvSetupPage() {
         status: "configured",
         description: "Base URL of your application",
       },
-    ]
+    ];
 
-    setEnvVars(envChecks)
-  }
+    setEnvVars(envChecks);
+  };
 
-  const updateGeneratedEnv = (chatId: string, webhookSecret: string, nextAuthSecret: string) => {
+  const updateGeneratedEnv = (
+    chatId: string,
+    webhookSecret: string,
+    nextAuthSecret: string
+  ) => {
     const envContent = `# Telegram Bot Configuration
 TELEGRAM_BOT_TOKEN=8191916988:AAFHPmITZpUJs8tQJC6h9VvX9Wa5mAOIdrYto
 TELEGRAM_CHAT_ID=${chatId || "your_chat_id_here"}
@@ -117,30 +132,34 @@ LOG_LEVEL=info
 # DATABASE_URL=postgresql://username:password@localhost:5432/chatapp
 # SUPABASE_URL=https://your-project.supabase.co
 # SUPABASE_ANON_KEY=your-supabase-anon-key
-# SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key`
+# SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key`;
 
-    setGeneratedEnv(envContent)
-  }
+    setGeneratedEnv(envContent);
+  };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-  }
+    navigator.clipboard.writeText(text);
+  };
 
   const downloadEnvFile = () => {
-    const blob = new Blob([generatedEnv], { type: "text/plain" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = ".env.local"
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
+    const blob = new Blob([generatedEnv], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = ".env.local";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
-    updateGeneratedEnv(customChatId, customWebhookSecret, generateRandomString(32))
-  }, [customChatId, customWebhookSecret])
+    updateGeneratedEnv(
+      customChatId,
+      customWebhookSecret,
+      generateRandomString(32)
+    );
+  }, [customChatId, customWebhookSecret]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -175,34 +194,49 @@ LOG_LEVEL=info
               </CardHeader>
               <CardContent className="space-y-4">
                 {envVars.map((env) => (
-                  <div key={env.name} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={env.name}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <code className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">{env.name}</code>
+                        <code className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
+                          {env.name}
+                        </code>
                         {env.required && (
                           <Badge variant="destructive" className="text-xs">
                             Required
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 mt-1">{env.description}</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {env.description}
+                      </p>
                       {env.value && (
                         <p className="text-xs text-gray-500 mt-1 font-mono">
-                          {env.value.length > 50 ? `${env.value.substring(0, 50)}...` : env.value}
+                          {env.value.length > 50
+                            ? `${env.value.substring(0, 50)}...`
+                            : env.value}
                         </p>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      {env.status === "configured" && <CheckCircle className="h-5 w-5 text-green-500" />}
-                      {env.status === "missing" && <AlertCircle className="h-5 w-5 text-red-500" />}
-                      {env.status === "present" && <CheckCircle className="h-5 w-5 text-yellow-500" />}
+                      {env.status === "configured" && (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      )}
+                      {env.status === "missing" && (
+                        <AlertCircle className="h-5 w-5 text-red-500" />
+                      )}
+                      {env.status === "present" && (
+                        <CheckCircle className="h-5 w-5 text-yellow-500" />
+                      )}
                       <Badge
                         variant={
                           env.status === "configured"
                             ? "default"
                             : env.status === "missing"
-                              ? "destructive"
-                              : "secondary"
+                            ? "destructive"
+                            : "secondary"
                         }
                       >
                         {env.status}
@@ -232,7 +266,9 @@ LOG_LEVEL=info
                       value={customChatId}
                       onChange={(e) => setCustomChatId(e.target.value)}
                     />
-                    <p className="text-sm text-gray-600">Get this from the Bot Settings page</p>
+                    <p className="text-sm text-gray-600">
+                      Get this from the Bot Settings page
+                    </p>
                   </div>
 
                   <div className="space-y-2">
@@ -243,7 +279,12 @@ LOG_LEVEL=info
                         value={customWebhookSecret}
                         onChange={(e) => setCustomWebhookSecret(e.target.value)}
                       />
-                      <Button variant="outline" onClick={() => setCustomWebhookSecret(generateRandomString(32))}>
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          setCustomWebhookSecret(generateRandomString(32))
+                        }
+                      >
                         Generate
                       </Button>
                     </div>
@@ -253,7 +294,11 @@ LOG_LEVEL=info
                 <div className="space-y-2">
                   <Label>Generated .env.local File</Label>
                   <div className="relative">
-                    <Textarea value={generatedEnv} readOnly className="font-mono text-sm h-64" />
+                    <Textarea
+                      value={generatedEnv}
+                      readOnly
+                      className="font-mono text-sm h-64"
+                    />
                     <Button
                       variant="outline"
                       size="sm"
@@ -270,7 +315,10 @@ LOG_LEVEL=info
                     <Download className="h-4 w-4 mr-2" />
                     Download .env.local
                   </Button>
-                  <Button variant="outline" onClick={() => copyToClipboard(generatedEnv)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => copyToClipboard(generatedEnv)}
+                  >
                     <Copy className="h-4 w-4 mr-2" />
                     Copy to Clipboard
                   </Button>
@@ -296,18 +344,25 @@ LOG_LEVEL=info
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <h4 className="font-semibold">2. Add environment variables</h4>
-                    <p className="text-sm text-gray-600">Copy the generated content from the "Generate .env" tab</p>
+                    <h4 className="font-semibold">
+                      2. Add environment variables
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Copy the generated content from the "Generate .env" tab
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-semibold">3. Get your Chat ID</h4>
                     <p className="text-sm text-gray-600">
-                      Go to Bot Settings → Find Chat ID and update TELEGRAM_CHAT_ID
+                      Go to Bot Settings → Find Chat ID and update
+                      TELEGRAM_CHAT_ID
                     </p>
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-semibold">4. Restart your app</h4>
-                    <p className="text-sm text-gray-600">Restart your development server to load the new variables</p>
+                    <p className="text-sm text-gray-600">
+                      Restart your development server to load the new variables
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -358,9 +413,11 @@ LOG_LEVEL=info
               <CardContent className="space-y-3">
                 <Alert>
                   <AlertDescription>
-                    <strong>Current:</strong> Messages are stored in memory (lost on restart)
+                    <strong>Current:</strong> Messages are stored in memory
+                    (lost on restart)
                     <br />
-                    <strong>For Production:</strong> Add database configuration for persistent storage
+                    <strong>For Production:</strong> Add database configuration
+                    for persistent storage
                   </AlertDescription>
                 </Alert>
                 <div className="space-y-2">
@@ -379,5 +436,5 @@ LOG_LEVEL=info
         </Tabs>
       </div>
     </div>
-  )
+  );
 }

@@ -161,14 +161,14 @@ export default function ChatApp() {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                message: `New message from ${username}: ${newMessage}`,
+                message: `DEV ${username}: ${newMessage}`,
                 chatId: CHAT_ID, // Use the public chat ID from env
                 botToken: botTokenInput, // Use the user-provided token for this call
               }),
             })
 
             const notifyData = await notifyResponse.json()
-
+            console.log("Telegram notification response:", notifyData)
             if (!notifyData.success) {
               console.error("Telegram notification failed:", notifyData.error)
               // You could show a toast notification here
@@ -331,7 +331,7 @@ export default function ChatApp() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-4xl mx-auto">
-        <Card className="h-[600px] flex flex-col">
+        <Card className="flex flex-col">
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
