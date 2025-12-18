@@ -17,7 +17,9 @@ import {
   AlertCircle,
   Webhook,
   LogOut,
+  Settings,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { ContactDialog } from "@/components/ContactDialog";
@@ -51,7 +53,7 @@ export default function ChatApp() {
     | "webhook_result"
     | "username_input"
     | "chat_active"
-  >("token_input");
+  >("username_input");
   // ----------------------------------------------------------------------------------------------------
   // IMPORTANT: Replace 'YOUR_NEW_BOT_TOKEN_HERE' with the token you got from @BotFather in Step 1.
   // This is used for the initial setup flow.
@@ -370,12 +372,33 @@ export default function ChatApp() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Input
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && joinChat()}
-            />
+            <div className="space-y-2">
+              <Label>Username</Label>
+              <Input
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && joinChat()}
+              />
+            </div>
+
+            <div className="flex items-center justify-between space-x-2 border p-3 rounded-lg bg-white/50">
+              <Label
+                htmlFor="notifications-mode"
+                className="flex flex-col space-y-1 cursor-pointer"
+              >
+                <span>Enable Notifications</span>
+                <span className="font-normal text-xs text-muted-foreground">
+                  Receive Telegram alerts
+                </span>
+              </Label>
+              <Switch
+                id="notifications-mode"
+                checked={notifications}
+                onCheckedChange={setNotifications}
+              />
+            </div>
+
             <Button
               onClick={joinChat}
               className="w-full"
@@ -383,11 +406,23 @@ export default function ChatApp() {
             >
               Join Chat
             </Button>
+
+            <div className="text-center pt-2">
+              <Button
+                variant="link"
+                className="text-xs text-muted-foreground"
+                onClick={() => setSetupStep("token_input")}
+              >
+                <Settings className="w-3 h-3 mr-1" />
+                Configure Bot Token
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
     );
   }
+  console.log("setupStep", setupStep);
 
   // Default: chat_active
   return (
