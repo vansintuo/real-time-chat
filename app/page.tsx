@@ -465,7 +465,7 @@ export default function ChatApp() {
           </CardHeader>
 
           <CardContent className="flex-1 flex flex-col space-y-4">
-            <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
+            <ScrollArea className="h-[400px] pr-4" ref={scrollAreaRef}>
               <div className="space-y-3">
                 {messages.length === 0 ? (
                   <div className="text-center text-gray-500 py-8">
