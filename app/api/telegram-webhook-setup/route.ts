@@ -22,7 +22,6 @@ export async function POST(request: NextRequest) {
           drop_pending_updates: true,
         }),
       })
-
       const data = await response.json()
 
       if (response.ok && data.ok) {

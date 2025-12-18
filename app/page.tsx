@@ -1,86 +1,108 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
-import { Send, MessageCircle, Bell, Bot, CheckCircle, AlertCircle, Webhook } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Label } from "@/components/ui/label"
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import {
+  Send,
+  MessageCircle,
+  Bell,
+  Bot,
+  CheckCircle,
+  AlertCircle,
+  Webhook,
+  LogOut,
+} from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
+import { ContactDialog } from "@/components/ContactDialog";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Message {
-  id: string
-  text: string
-  sender: string
-  timestamp: Date
-  notified?: boolean
-  source?: string
+  id: string;
+  text: string;
+  sender: string;
+  timestamp: Date;
+  notified?: boolean;
+  source?: string;
 }
 
 // Read the Chat ID from a PUBLIC env var so the client can access it.
 // Add NEXT_PUBLIC_TELEGRAM_CHAT_ID=123456789 to your .env.local
-const CHAT_ID = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID
+const CHAT_ID = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
 
 export default function ChatApp() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [newMessage, setNewMessage] = useState("")
-  const [username, setUsername] = useState("")
-  const [notifications, setNotifications] = useState(true)
-  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [username, setUsername] = useState("");
+  const [notifications, setNotifications] = useState(true);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   // New states for the setup flow
   const [setupStep, setSetupStep] = useState<
-    "token_input" | "webhook_registering" | "webhook_result" | "username_input" | "chat_active"
-  >("token_input")
+    | "token_input"
+    | "webhook_registering"
+    | "webhook_result"
+    | "username_input"
+    | "chat_active"
+  >("token_input");
   // ----------------------------------------------------------------------------------------------------
   // IMPORTANT: Replace 'YOUR_NEW_BOT_TOKEN_HERE' with the token you got from @BotFather in Step 1.
   // This is used for the initial setup flow.
   // ----------------------------------------------------------------------------------------------------
-  const [botTokenInput, setBotTokenInput] = useState("") // <--- UPDATE THIS LINE
-  const [webhookStatus, setWebhookStatus] = useState<{ type: "success" | "error"; message: string } | null>(null)
-  const [isWebhookLoading, setIsWebhookLoading] = useState(false)
+  const [botTokenInput, setBotTokenInput] = useState(""); // <--- UPDATE THIS LINE
+  const [webhookStatus, setWebhookStatus] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+  const [isWebhookLoading, setIsWebhookLoading] = useState(false);
 
   // Simulate real-time by polling for new messages
   useEffect(() => {
-    if (setupStep !== "chat_active") return
+    if (setupStep !== "chat_active") return;
 
     const interval = setInterval(async () => {
       try {
-        const response = await fetch("/api/messages")
-        const data = await response.json()
-        setMessages(data.messages || [])
+        const response = await fetch("/api/messages");
+        const data = await response.json();
+        setMessages(data.messages || []);
       } catch (error) {
-        console.error("Failed to fetch messages:", error)
+        console.error("Failed to fetch messages:", error);
       }
-    }, 1000)
+    }, 1000);
 
-    return () => clearInterval(interval)
-  }, [setupStep])
+    return () => clearInterval(interval);
+  }, [setupStep]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-  }, [messages])
+  }, [messages]);
 
   const registerWebhook = async () => {
     if (!botTokenInput.trim()) {
-      setWebhookStatus({ type: "error", message: "Please enter your Telegram Bot Token." })
-      return
+      setWebhookStatus({
+        type: "error",
+        message: "Please enter your Telegram Bot Token.",
+      });
+      return;
     }
 
-    setIsWebhookLoading(true)
-    setWebhookStatus(null)
-    setSetupStep("webhook_registering")
+    setIsWebhookLoading(true);
+    setWebhookStatus(null);
+    setSetupStep("webhook_registering");
 
     try {
-      const currentDomain = window.location.origin
-      const webhookUrl = `https://real-time-chat-coral-seven.vercel.app/telegram-webhook`
+      const currentDomain = window.location.origin;
+      const webhookUrl = `https://real-time-chat-coral-seven.vercel.app/telegram-webhook`;
 
       const response = await fetch("/api/telegram-webhook-setup", {
         method: "POST",
@@ -92,53 +114,63 @@ export default function ChatApp() {
           webhookUrl: webhookUrl,
           botToken: botTokenInput, // Pass the token from input
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok && data.success) {
         setWebhookStatus({
           type: "success",
-          message: "Webhook registered successfully! You can now enter your username.",
-        })
-        setSetupStep("webhook_result")
+          message:
+            "Webhook registered successfully! You can now enter your username.",
+        });
+        setSetupStep("webhook_result");
       } else {
         setWebhookStatus({
           type: "error",
-          message: data.error || "Failed to register webhook. Please check your token.",
-        })
-        setSetupStep("webhook_result")
+          message:
+            data.error ||
+            "Failed to register webhook. Please check your token.",
+        });
+        setSetupStep("webhook_result");
       }
     } catch (error) {
       setWebhookStatus({
         type: "error",
-        message: `Network error: ${error instanceof Error ? error.message : "Unknown error"}`,
-      })
-      setSetupStep("webhook_result")
+        message: `Network error: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+      });
+      setSetupStep("webhook_result");
     } finally {
-      setIsWebhookLoading(false)
+      setIsWebhookLoading(false);
     }
-  }
+  };
 
   const proceedToUsername = () => {
-    setSetupStep("username_input")
-  }
+    setSetupStep("username_input");
+  };
 
   const joinChat = () => {
     if (username.trim()) {
-      setSetupStep("chat_active")
+      setSetupStep("chat_active");
     }
-  }
+  };
+
+  const handleLogout = () => {
+    setUsername("");
+    setSetupStep("username_input");
+  };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !username.trim()) return
+    if (!newMessage.trim() || !username.trim()) return;
 
     const message: Message = {
       id: Date.now().toString(),
       text: newMessage,
       sender: username,
       timestamp: new Date(),
-    }
+    };
 
     try {
       const response = await fetch("/api/messages", {
@@ -147,10 +179,10 @@ export default function ChatApp() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(message),
-      })
+      });
 
       if (response.ok) {
-        setNewMessage("")
+        setNewMessage("");
 
         // Send Telegram notification if enabled
         if (notifications) {
@@ -165,30 +197,40 @@ export default function ChatApp() {
                 chatId: CHAT_ID, // Use the public chat ID from env
                 botToken: botTokenInput, // Use the user-provided token for this call
               }),
-            })
+            });
 
-            const notifyData = await notifyResponse.json()
-            console.log("Telegram notification response:", notifyData)
+            const notifyData = await notifyResponse.json();
+            console.log("Telegram notification response:", notifyData);
             if (!notifyData.success) {
-              console.error("Telegram notification failed:", notifyData.error)
-              // You could show a toast notification here
+              console.error("Telegram notification failed:", notifyData.error);
+              toast({
+                title: "Notification Failed",
+                description:
+                  notifyData.error || "Could not send Telegram notification",
+                variant: "destructive",
+              });
             }
           } catch (error) {
-            console.error("Failed to send Telegram notification:", error)
+            console.error("Failed to send Telegram notification:", error);
+            toast({
+              title: "Notification Error",
+              description: "Network error while sending notification",
+              variant: "destructive",
+            });
           }
         }
       }
     } catch (error) {
-      console.error("Failed to send message:", error)
+      console.error("Failed to send message:", error);
     }
-  }
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
+      e.preventDefault();
+      sendMessage();
     }
-  }
+  };
 
   // Render different screens based on setupStep
   if (setupStep === "token_input") {
@@ -224,11 +266,19 @@ export default function ChatApp() {
                 on Telegram.
               </p>
             </div>
-            <Button onClick={registerWebhook} className="w-full" disabled={!botTokenInput.trim() || isWebhookLoading}>
+            <Button
+              onClick={registerWebhook}
+              className="w-full"
+              disabled={!botTokenInput.trim() || isWebhookLoading}
+            >
               {isWebhookLoading ? "Registering Webhook..." : "Register Webhook"}
             </Button>
             {webhookStatus && (
-              <Alert variant={webhookStatus.type === "error" ? "destructive" : "default"}>
+              <Alert
+                variant={
+                  webhookStatus.type === "error" ? "destructive" : "default"
+                }
+              >
                 {webhookStatus.type === "success" ? (
                   <CheckCircle className="h-4 w-4" />
                 ) : (
@@ -240,7 +290,7 @@ export default function ChatApp() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   if (setupStep === "webhook_registering") {
@@ -258,7 +308,7 @@ export default function ChatApp() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   if (setupStep === "webhook_result") {
@@ -277,7 +327,11 @@ export default function ChatApp() {
           </CardHeader>
           <CardContent className="space-y-4">
             {webhookStatus && (
-              <Alert variant={webhookStatus.type === "error" ? "destructive" : "default"}>
+              <Alert
+                variant={
+                  webhookStatus.type === "error" ? "destructive" : "default"
+                }
+              >
                 {webhookStatus.type === "success" ? (
                   <CheckCircle className="h-4 w-4" />
                 ) : (
@@ -291,14 +345,18 @@ export default function ChatApp() {
                 Proceed to Chat
               </Button>
             ) : (
-              <Button onClick={() => setSetupStep("token_input")} className="w-full" variant="outline">
+              <Button
+                onClick={() => setSetupStep("token_input")}
+                className="w-full"
+                variant="outline"
+              >
                 Try Again
               </Button>
             )}
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   if (setupStep === "username_input") {
@@ -318,13 +376,17 @@ export default function ChatApp() {
               onChange={(e) => setUsername(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && joinChat()}
             />
-            <Button onClick={joinChat} className="w-full" disabled={!username.trim()}>
+            <Button
+              onClick={joinChat}
+              className="w-full"
+              disabled={!username.trim()}
+            >
               Join Chat
             </Button>
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // Default: chat_active
@@ -340,35 +402,57 @@ export default function ChatApp() {
                 {username}
               </Badge>
             </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setNotifications(!notifications)}
-              className={notifications ? "bg-green-50" : "bg-gray-50"}
-            >
-              <Bell className={`h-4 w-4 mr-2 ${notifications ? "text-green-600" : "text-gray-400"}`} />
-              {notifications ? "Notifications ON" : "Notifications OFF"}
-            </Button>
+            <div className="flex items-center gap-2">
+              <ContactDialog />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setNotifications(!notifications)}
+                className={notifications ? "bg-green-50" : "bg-gray-50"}
+              >
+                <Bell
+                  className={`h-4 w-4 mr-2 ${
+                    notifications ? "text-green-600" : "text-gray-400"
+                  }`}
+                />
+                {notifications ? "Notifications ON" : "Notifications OFF"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="text-red-600 hover:bg-red-50 border-red-200"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Exit
+              </Button>
+            </div>
           </CardHeader>
 
           <CardContent className="flex-1 flex flex-col space-y-4">
             <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
               <div className="space-y-3">
                 {messages.length === 0 ? (
-                  <div className="text-center text-gray-500 py-8">No messages yet. Start the conversation!</div>
+                  <div className="text-center text-gray-500 py-8">
+                    No messages yet. Start the conversation!
+                  </div>
                 ) : (
                   messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.sender === username ? "justify-end" : "justify-start"}`}
+                      className={`flex ${
+                        message.sender === username
+                          ? "justify-end"
+                          : "justify-start"
+                      }`}
                     >
                       <div
                         className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                           message.sender === username
                             ? "bg-blue-500 text-white"
                             : message.source === "telegram"
-                              ? "bg-purple-100 text-purple-800 border border-purple-200"
-                              : "bg-gray-200 text-gray-800"
+                            ? "bg-purple-100 text-purple-800 border border-purple-200"
+                            : "bg-gray-200 text-gray-800"
                         }`}
                       >
                         <div className="text-sm font-medium mb-1 flex items-center gap-1">
@@ -406,5 +490,5 @@ export default function ChatApp() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
