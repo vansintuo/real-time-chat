@@ -7,8 +7,8 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Real-time Chat with Telegram Notifications",
-  description: "A real-time chat application with Telegram bot integration",
+  title: "Community GenZ with Telegram Notifications",
+  description: "A Community GenZ application with Telegram bot integration",
 };
 
 export default function RootLayout({

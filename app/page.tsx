@@ -368,7 +368,7 @@ export default function ChatApp() {
           <CardHeader className="text-center">
             <CardTitle className="flex items-center gap-2">
               <MessageCircle className="h-6 w-6" />
-              Join Real-time Chat
+              Join Community GenZ
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -432,7 +432,7 @@ export default function ChatApp() {
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
-              Real-time Chat
+              Community GenZ
               <Badge variant="secondary" className="ml-2">
                 {username}
               </Badge>
